@@ -9,26 +9,24 @@ load_dotenv()
 API_KEY = os.getenv("OPENAI_API_KEY")
 
 class KeyHandler(BaseHTTPRequestHandler):
+    def _set_headers(self, status=200, content_type="application/json"):
+        self.send_response(status)
+        self.send_header("Content-type", content_type)
+        self.send_header("Access-Control-Allow-Origin", "*")
+        self.send_header("Access-Control-Allow-Methods", "GET, OPTIONS")
+        self.send_header("Access-Control-Allow-Headers", "Content-Type, ngrok-skip-browser-warning")
+        self.end_headers()
+
     def do_GET(self):
         if self.path == "/api/key":
-            self.send_response(200)
-            self.send_header('Content-type', 'application/json')
-            self.send_header('Access-Control-Allow-Origin', '*')
-            self.end_headers()
-            
+            self._set_headers()
             response_data = {"key": API_KEY}
-            self.wfile.write(json.dumps(response_data).encode('utf-8'))
+            self.wfile.write(json.dumps(response_data).encode("utf-8"))
         else:
-            self.send_response(404)
-            self.send_header('Access-Control-Allow-Origin', '*')
-            self.end_headers()
-    
+            self._set_headers(404)
+
     def do_OPTIONS(self):
-        self.send_response(200)
-        self.send_header('Access-Control-Allow-Origin', '*')
-        self.send_header('Access-Control-Allow-Methods', 'GET, OPTIONS')
-        self.send_header('Access-Control-Allow-Headers', 'Content-Type, ngrok-skip-browser-warning')
-        self.end_headers()
+        self._set_headers()
 
 def start_server():
     server = HTTPServer(("0.0.0.0", 8080), KeyHandler)

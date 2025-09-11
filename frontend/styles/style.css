@@ -1,0 +1,109 @@
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  background-color: #fafafa;
+}
+
+.main {
+  display: flex;
+  flex-direction: row;
+  min-height: 100vh;
+}
+
+.navbar {
+  background-color: #f8f9fa !important;
+}
+
+section {
+  flex: 1;          
+  display: flex;
+  flex-direction: column;
+}
+
+.content-container {
+  flex: 1;
+  display: flex;
+  gap: 0.5rem;     
+}
+
+.input-container {
+  flex: 1;           
+}
+
+.input {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  background-color: #ffffff;
+  border-radius: 10px;
+  padding: 1rem;
+}
+
+.input-mode {
+  width: 100%;
+}
+
+.input-text {
+  flex: 1;           
+  background-color: #f8f8f8;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  resize: none;
+  padding: 0.5rem;
+}
+
+.visuialize-button-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 0.5rem;
+}
+
+.canvas-container {
+  flex: 2;           
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.app-name-container {
+  justify-content: center !important;
+}
+
+canvas {
+  width: 100%;
+  height: 100%;
+  background-color: #FFFFFF;
+  border-radius: 10px;
+}
+
+.app-name {
+  font-weight: bold;
+}
+
+.widget-glass {
+  background-color: rgba(255, 255, 255, 0.2); /* полупрозрачный фон */
+  backdrop-filter: blur(10px);               /* размытие фона */
+  border-radius: 15px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.btn-primary {
+  color: #fff !important; /* текст всегда белый */
+}
+.btn-primary:hover,
+.btn-primary:focus {
+  color: #fff !important; /* при наведении тоже белый */
+}
+
+
+@media(max-width: 500px) {
+   .content-container {
+    flex-direction: column !important;
+   }
+   canvas {
+    height: 100%;
+    flex: 2;
+   }
+}

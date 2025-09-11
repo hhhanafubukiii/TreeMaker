@@ -1,4 +1,3 @@
-// Elements
 const codeButton = document.getElementById("code-btn");
 const AIButton = document.getElementById("ai-btn");
 const visualizeButton = document.getElementById("visualize-btn");
@@ -11,7 +10,6 @@ let inputMode = "code";
 let treeRoot = null;
 let nodePositions = new Map();
 
-// Панорамирование и масштабирование
 let scale = 1;
 let originX = 0;
 let originY = 0;
@@ -27,14 +25,23 @@ let lastDistance = 0;
 API_KEY = null
 
 async function getKey() {
-  const response = await fetch("http://localhost:8080/api/key");
-  const data = await response.json();
-  API_KEY = data.key
-}
+    const headers = new Headers();
+    headers.append("ngrok-skip-browser-warning", "true");
 
+    const response = await fetch(
+      "https://853b1476939f.ngrok-free.app/api/key",
+      {
+        method: "GET",
+        headers: headers,
+      }
+    );
+
+    console.log(response)
+    const data = await response.json();
+    API_KEY = data.key
+}
 getKey()
 
-// --- Tree Logic ---
 class TreeNode {
     constructor(value) {
         this.value = value;
@@ -79,7 +86,6 @@ function calculateNodePositions(root) {
 
     dfs(root);
 
-    // Центрируем по горизонтали
     const allX = Array.from(nodePositions.values()).map((p) => p.x);
     const centerX = (Math.min(...allX) + Math.max(...allX)) / 2;
     nodePositions.forEach((pos) => (pos.x -= centerX));
@@ -89,7 +95,6 @@ function drawRecursive(node) {
     if (!node) return;
     const pos = nodePositions.get(node);
 
-    // Линии к детям
     if (node.left) {
         const childPos = nodePositions.get(node.left);
         ctx.beginPath();
@@ -111,10 +116,9 @@ function drawRecursive(node) {
         drawRecursive(node.right);
     }
 
-    // Узел
     ctx.beginPath();
     ctx.arc(pos.x, pos.y, 20, 0, 2 * Math.PI);
-    ctx.fillStyle = "#0d6efd"; // bootstrap primary
+    ctx.fillStyle = "#0d6efd";
     ctx.fill();
 
     ctx.fillStyle = "white";
@@ -128,7 +132,7 @@ function draw() {
     if (!treeRoot) return;
 
     ctx.save();
-    ctx.setTransform(1, 0, 0, 1, 0, 0); // сброс трансформаций
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.restore();
 
@@ -152,12 +156,11 @@ function resizeCanvas() {
 function renderTree(data) {
     treeRoot = buildTree(data);
     if (!treeRoot) {
-        draw(); // очистим канвас
+        draw();
         return;
     }
     calculateNodePositions(treeRoot);
 
-    // позиция корня
     const rootPos = nodePositions.get(treeRoot);
     originX = canvas.width / 2 - rootPos.x * scale;
     originY = canvas.height / 4 - rootPos.y * scale;
@@ -165,7 +168,6 @@ function renderTree(data) {
     draw();
 }
 
-// --- Input Mode ---
 function loadInputMode(activeBtn, inactiveBtn) {
     input.value = '';
     inputMode = activeBtn === codeButton ? "code" : "ai";
@@ -206,7 +208,6 @@ async function startProcess() {
     }
 }
 
-// --- Events ---
 document.addEventListener("DOMContentLoaded", () => {
     codeButton.addEventListener("click", () =>
         loadInputMode(codeButton, AIButton)
@@ -217,7 +218,6 @@ document.addEventListener("DOMContentLoaded", () => {
     window.addEventListener("resize", resizeCanvas);
     resizeCanvas();
 
-    // Pan & Zoom
     canvas.addEventListener("mousedown", (e) => {
         isDragging = true;
         lastDragX = e.clientX;
@@ -280,7 +280,6 @@ document.addEventListener("DOMContentLoaded", () => {
         if (e.touches.length === 2) {
             e.preventDefault();
 
-            // расстояние между пальцами
             const dx = e.touches[0].clientX - e.touches[1].clientX;
             const dy = e.touches[0].clientY - e.touches[1].clientY;
             const distance = Math.sqrt(dx * dx + dy * dy);
@@ -302,39 +301,39 @@ document.addEventListener("DOMContentLoaded", () => {
 
 async function getArrayFromDescription(description) {
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + API_KEY,
-      },
-      body: JSON.stringify({
-        model: "gpt-4o-mini",
-        messages: [
-          {
-            role: "system",
-            content:
-              "Ты помощник, который получает текстовое описание бинарного дерева и возвращает массив чисел JSON.",
-          },
-          { role: "user", content: description },
-        ],
-        temperature: 0,
-        response_format: {
-          type: "json_schema",
-          json_schema: {
-            name: "array_of_numbers",
-            schema: {
-              type: "object",
-              properties: {
-                array: {
-                  type: "array",
-                  items: { type: "number" },
-                },
-              },
-              required: ["array"],
-            },
-          },
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + API_KEY,
         },
-      }),
+        body: JSON.stringify({
+            model: "gpt-4o-mini",
+            messages: [
+                {
+                    role: "system",
+                    content:
+                        "Ты помощник, который получает текстовое описание бинарного дерева и возвращает массив чисел JSON.",
+                },
+                { role: "user", content: description },
+            ],
+            temperature: 0,
+            response_format: {
+                type: "json_schema",
+                json_schema: {
+                    name: "array_of_numbers",
+                    schema: {
+                        type: "object",
+                        properties: {
+                            array: {
+                                type: "array",
+                                items: { type: "number" },
+                            },
+                        },
+                        required: ["array"],
+                    },
+                },
+            },
+        }),
     });
 
     const data = await response.json();

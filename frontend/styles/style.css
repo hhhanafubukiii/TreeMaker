@@ -82,19 +82,19 @@ canvas {
 }
 
 .widget-glass {
-  background-color: rgba(255, 255, 255, 0.2); /* полупрозрачный фон */
-  backdrop-filter: blur(10px);               /* размытие фона */
+  background-color: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);            
   border-radius: 15px;
   border: 1px solid rgba(255, 255, 255, 0.3);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
 }
 
 .btn-primary {
-  color: #fff !important; /* текст всегда белый */
+  color: #fff !important;
 }
 .btn-primary:hover,
 .btn-primary:focus {
-  color: #fff !important; /* при наведении тоже белый */
+  color: #fff !important;
 }
 
 

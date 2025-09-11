@@ -236,6 +236,7 @@ document.addEventListener("DOMContentLoaded", () => {
         draw();
     });
     canvas.addEventListener("wheel", (e) => {
+        console.log("something is happening")
         e.preventDefault();
         const zoomIntensity = 0.1;
         const wheel = e.deltaY < 0 ? 1 : -1;
@@ -339,6 +340,5 @@ async function getArrayFromDescription(description) {
     const data = await response.json();
     const content = data.choices[0].message.content
     const arr = JSON.parse(content).array
-    renderTree(arr)
-    return
+    return arr
 }

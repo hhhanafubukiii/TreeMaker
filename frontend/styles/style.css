@@ -21,6 +21,10 @@ section {
   background-color: #f8f9fa !important;
 }
 
+.navbar-brand {
+  margin: 0 !important;
+}
+
 .app-name-container {
   justify-content: center !important;
 }
@@ -72,6 +76,23 @@ section {
   display: flex;
   justify-content: center;
   align-items: center;
+  border-radius: 10px;
+}
+
+.dashboard {
+  display: flex;
+  flex-direction: row;
+  padding: 0.5em;
+  background-color: #fafafa;
+  border-radius: 10px;
+}
+
+#search-input {
+  padding: 5px;
+  border: solid;
+  border-width: 0.5px;
+  border-radius: 5px;
+  margin-right: 0.3em;
 }
 
 canvas {

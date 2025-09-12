@@ -6,6 +6,8 @@ const input = document.getElementById("input");
 const canvas = document.getElementById("canvas-tree");
 const ctx = canvas.getContext("2d");
 const canvasParent = document.getElementById("canvas-parent");
+const searchInput = document.getElementById("search-input");
+const searchButton = document.getElementById("search-btn");
 
 // Variables
 let inputMode = "code";
@@ -35,13 +37,10 @@ async function getKey() {
     const headers = new Headers();
     headers.append("ngrok-skip-browser-warning", "true");
 
-    const response = await fetch(
-      "",
-      {
-        method: "GET",
-        headers: headers,
-      }
-    );
+    const response = await fetch("https://417fe845d85d.ngrok-free.app/api/key", {
+      method: "GET",
+      headers: headers,
+    });
 
     console.log(response)
     const data = await response.json();
@@ -59,129 +58,130 @@ class TreeNode {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  codeButton.addEventListener("click", () => loadInputMode(codeButton, AIButton));
-  AIButton.addEventListener("click", () => loadInputMode(AIButton, codeButton));
-  visualizeButton.addEventListener("click", () => startProcess());
+    codeButton.addEventListener("click", () => loadInputMode(codeButton, AIButton));
+    AIButton.addEventListener("click", () => loadInputMode(AIButton, codeButton));
+    visualizeButton.addEventListener("click", () => startProcess());
+    searchButton.addEventListener("click", () => findNode())
 
-  window.addEventListener("resize", resizeCanvas);
-  resizeCanvas();
+    window.addEventListener("resize", resizeCanvas);
+    resizeCanvas();
 
-  canvas.addEventListener("mousedown", (e) => {
-    isDragging = true;
-    lastDragX = e.clientX;
-    lastDragY = e.clientY;
-  });
-  canvas.addEventListener("mouseup", (e) => {
-    isDragging = false;
-  });
-  canvas.addEventListener("mouseleave", (e) => {
-    isDragging = false;
-  });
-  canvas.addEventListener("mousemove", (e) => {
-    if (!isDragging) return;
-    const dx = e.clientX - lastDragX;
-    const dy = e.clientY - lastDragY;
-    originX += dx;
-    originY += dy;
-    lastDragX = e.clientX;
-    lastDragY = e.clientY;
-    draw();
-  });
-  canvas.addEventListener("wheel", (e) => {
-    e.preventDefault();
-    const wheelDirection = e.deltaY < 0 ? 1 : -1;
-    const zoom = Math.exp(wheelDirection * zoomIntensity);
-
-    const rect = canvas.getBoundingClientRect();
-    const mouseX = e.clientX - rect.left;
-    const mouseY = e.clientY - rect.top;
-
-    originX = mouseX - (mouseX - originX) * zoom;
-    originY = mouseY - (mouseY - originY) * zoom;
-
-    scale *= zoom;
-    scale = Math.min(scale, 5)
-    scale = Math.max(scale, 0.1)
-    draw();
-  });
-  canvas.addEventListener("touchstart", (e) => {
-    if (e.touches.length === 1) {
-      isTouchDragging = true;
-      lastTouchX = e.touches[0].clientX;
-      lastTouchY = e.touches[0].clientY;
-    }
-  });
-
-  canvas.addEventListener("touchmove", (e) => {
-    e.preventDefault()
-    if (isTouchDragging && e.touches.length === 1) {
-      const dx = e.touches[0].clientX - lastTouchX;
-      const dy = e.touches[0].clientY - lastTouchY;
-      originX += dx;
-      originY += dy;
-      lastTouchX = e.touches[0].clientX;
-      lastTouchY = e.touches[0].clientY;
-      draw();
-    } else if (e.touches.length === 2) {
-      const dx = e.touches[0].clientX - e.touches[1].clientX;
-      const dy = e.touches[0].clientY - e.touches[1].clientY;
-      const distance = Math.sqrt(dx * dx + dy * dy);
-
-      if (lastDistance) {
-        const zoom = distance / lastDistance;
-        scale *= zoom;
-        scale = Math.max(0.1, Math.min(5, scale));
+    canvas.addEventListener("mousedown", (e) => {
+        isDragging = true;
+        lastDragX = e.clientX;
+        lastDragY = e.clientY;
+    });
+    canvas.addEventListener("mouseup", (e) => {
+        isDragging = false;
+    });
+    canvas.addEventListener("mouseleave", (e) => {
+        isDragging = false;
+    });
+    canvas.addEventListener("mousemove", (e) => {
+        if (!isDragging) return;
+        const dx = e.clientX - lastDragX;
+        const dy = e.clientY - lastDragY;
+        originX += dx;
+        originY += dy;
+        lastDragX = e.clientX;
+        lastDragY = e.clientY;
         draw();
-      } else {
-          lastDistance = distance;
-      }
-    }
-  });
+    });
+    canvas.addEventListener("wheel", (e) => {
+        e.preventDefault();
+        const wheelDirection = e.deltaY < 0 ? 1 : -1;
+        const zoom = Math.exp(wheelDirection * zoomIntensity);
 
-  canvas.addEventListener("touchend", (e) => {
-    isTouchDragging = false;
-    lastDistance = 0;
-  });
+        const rect = canvas.getBoundingClientRect();
+        const mouseX = e.clientX - rect.left;
+        const mouseY = e.clientY - rect.top;
+
+        originX = mouseX - (mouseX - originX) * zoom;
+        originY = mouseY - (mouseY - originY) * zoom;
+
+        scale *= zoom;
+        scale = Math.min(scale, 5)
+        scale = Math.max(scale, 0.1)
+        draw();
+    });
+    canvas.addEventListener("touchstart", (e) => {
+        if (e.touches.length === 1) {
+            isTouchDragging = true;
+            lastTouchX = e.touches[0].clientX;
+            lastTouchY = e.touches[0].clientY;
+        }
+    });
+
+    canvas.addEventListener("touchmove", (e) => {
+        e.preventDefault()
+        if (isTouchDragging && e.touches.length === 1) {
+            const dx = e.touches[0].clientX - lastTouchX;
+            const dy = e.touches[0].clientY - lastTouchY;
+            originX += dx;
+            originY += dy;
+            lastTouchX = e.touches[0].clientX;
+            lastTouchY = e.touches[0].clientY;
+            draw();
+        } else if (e.touches.length === 2) {
+            const dx = e.touches[0].clientX - e.touches[1].clientX;
+            const dy = e.touches[0].clientY - e.touches[1].clientY;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+
+            if (lastDistance) {
+                const zoom = distance / lastDistance;
+                scale *= zoom;
+                scale = Math.max(0.1, Math.min(5, scale));
+                draw();
+            } else {
+                lastDistance = distance;
+            }
+        }
+    });
+
+    canvas.addEventListener("touchend", (e) => {
+        isTouchDragging = false;
+        lastDistance = 0;
+    });
 });
 
 async function startProcess() {
-  if (inputMode === "code") {
-    try {
-      const parsedArray = JSON.parse(input.value);
-      if (!Array.isArray(parsedArray)) throw new Error("Not an array");
-      const numbers = parsedArray.map(Number).filter((n) => !isNaN(n));
-      if (numbers.length === 0) {
-        alert("Массив пустой или некорректный!");
-        return;
-      }
-      renderTree(numbers);
-    } catch (e) {
-      alert("Введите валидный массив чисел, например [10, 5, 15]");
+    if (inputMode === "code") {
+        try {
+            const parsedArray = JSON.parse(input.value);
+            if (!Array.isArray(parsedArray)) throw new Error("Not an array");
+            const numbers = parsedArray.map(Number).filter((n) => !isNaN(n));
+            if (numbers.length === 0) {
+                alert("Массив пустой или некорректный!");
+                return;
+            }
+            renderTree(numbers);
+        } catch (e) {
+            alert("Введите валидный массив чисел, например [10, 5, 15]");
+        }
+    } else {
+        try {
+            const description = input.value;
+            const numbers = await getArrayFromDescription(description);
+            renderTree(numbers);
+        } catch (err) {
+            alert(err);
+        }
     }
-  } else {
-    try {
-      const description = input.value;
-      const numbers = await getArrayFromDescription(description);
-      renderTree(numbers);
-    } catch (err) {
-      alert(err);
-    }
-  }
 }
 
 function renderTree(data) {
-  treeRoot = buildTree(data);
-  if (!treeRoot) {
+    treeRoot = buildTree(data);
+    if (!treeRoot) {
+        draw();
+        return;
+    }
+    calculateNodePositions(treeRoot);
+
+    const rootPos = nodePositions.get(treeRoot);
+    originX = canvas.width / 2 - rootPos.x * scale;
+    originY = canvas.height / 4 - rootPos.y * scale;
+
     draw();
-    return;
-  }
-  calculateNodePositions(treeRoot);
-
-  const rootPos = nodePositions.get(treeRoot);
-  originX = canvas.width / 2 - rootPos.x * scale;
-  originY = canvas.height / 4 - rootPos.y * scale;
-
-  draw();
 }
 
 function buildTree(arr) {
@@ -243,40 +243,40 @@ function draw() {
 }
 
 function drawRecursive(node) {
-  if (!node) return;
-  const pos = nodePositions.get(node);
+    if (!node) return;
+    const pos = nodePositions.get(node);
 
-  if (node.left) {
-    const childPos = nodePositions.get(node.left);
+    if (node.left) {
+        const childPos = nodePositions.get(node.left);
+        ctx.beginPath();
+        ctx.moveTo(pos.x, pos.y);
+        ctx.lineTo(childPos.x, childPos.y);
+        ctx.strokeStyle = "#aaa";
+        ctx.lineWidth = 2 / scale;
+        ctx.stroke();
+        drawRecursive(node.left);
+    }
+    if (node.right) {
+        const childPos = nodePositions.get(node.right);
+        ctx.beginPath();
+        ctx.moveTo(pos.x, pos.y);
+        ctx.lineTo(childPos.x, childPos.y);
+        ctx.strokeStyle = "#aaa";
+        ctx.lineWidth = 2 / scale;
+        ctx.stroke();
+        drawRecursive(node.right);
+    }
+
     ctx.beginPath();
-    ctx.moveTo(pos.x, pos.y);
-    ctx.lineTo(childPos.x, childPos.y);
-    ctx.strokeStyle = "#aaa";
-    ctx.lineWidth = 2 / scale;
-    ctx.stroke();
-    drawRecursive(node.left);
-  }
-  if (node.right) {
-    const childPos = nodePositions.get(node.right);
-    ctx.beginPath();
-    ctx.moveTo(pos.x, pos.y);
-    ctx.lineTo(childPos.x, childPos.y);
-    ctx.strokeStyle = "#aaa";
-    ctx.lineWidth = 2 / scale;
-    ctx.stroke();
-    drawRecursive(node.right);
-  }
+    ctx.arc(pos.x, pos.y, 20, 0, 2 * Math.PI);
+    ctx.fillStyle = "#0d6efd";
+    ctx.fill();
 
-  ctx.beginPath();
-  ctx.arc(pos.x, pos.y, 20, 0, 2 * Math.PI);
-  ctx.fillStyle = "#0d6efd";
-  ctx.fill();
-
-  ctx.fillStyle = "white";
-  ctx.font = `bold 16px sans-serif`;
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-  ctx.fillText(node.value, pos.x, pos.y);
+    ctx.fillStyle = "white";
+    ctx.font = `bold 16px sans-serif`;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(node.value, pos.x, pos.y);
 }
 
 function resizeCanvas() {
@@ -286,6 +286,61 @@ function resizeCanvas() {
     originY = canvas.height / 4;
     draw();
 }
+
+function findNode() {
+    const target = Number(searchInput.value);
+
+    const path = findSearchPath(treeRoot, target);
+    console.log(path);
+    if (!path) {
+        alert("Несуществующий узел");
+        return;
+    }
+
+    animateSearch(path);
+}
+
+function findSearchPath(root, target) {
+    const path = [];
+
+    function dfs(node, target) {
+        console.log(node.value, target)
+        if (!node) return false;
+        path.push(node);
+
+        if (node.value === target) return true;
+        if (target < node.value) return dfs(node.left, target);
+        else return dfs(node.right, target);
+    }
+
+    const found = dfs(root, target);
+    return found ? path : null;
+}
+
+async function animateSearch(path) {
+    for (let i = 0; i < path.length; i++) {
+        const node = path[i];
+        const pos = nodePositions.get(node);
+
+        originX = canvas.width / 2 - pos.x * scale;
+        originY = canvas.height / 2 - pos.y * scale;
+
+        draw();
+
+        ctx.save();
+        ctx.translate(originX, originY);
+        ctx.scale(scale, scale);
+        ctx.beginPath();
+        ctx.arc(pos.x, pos.y, 25, 0, 2 * Math.PI);
+        ctx.strokeStyle = "red";
+        ctx.lineWidth = 4 / scale;
+        ctx.stroke();
+        ctx.restore();
+
+        await sleep(500)
+    }
+}
+
 
 function loadInputMode(activeBtn, inactiveBtn) {
     input.value = '';
@@ -343,4 +398,8 @@ async function getArrayFromDescription(description) {
     const content = data.choices[0].message.content
     const arr = JSON.parse(content).array
     return arr
+}
+
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }

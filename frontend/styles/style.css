@@ -5,6 +5,12 @@ html, body {
   background-color: #fafafa;
 }
 
+section {
+  flex: 1;          
+  display: flex;
+  flex-direction: column;
+}
+
 .main {
   display: flex;
   flex-direction: row;
@@ -15,10 +21,12 @@ html, body {
   background-color: #f8f9fa !important;
 }
 
-section {
-  flex: 1;          
-  display: flex;
-  flex-direction: column;
+.app-name-container {
+  justify-content: center !important;
+}
+
+.app-name {
+  font-weight: bold;
 }
 
 .content-container {
@@ -66,10 +74,6 @@ section {
   align-items: center;
 }
 
-.app-name-container {
-  justify-content: center !important;
-}
-
 canvas {
   width: 100%;
   height: 100%;
@@ -77,11 +81,7 @@ canvas {
   border-radius: 10px;
 }
 
-.app-name {
-  font-weight: bold;
-}
-
-.widget-glass {
+.glass {
   background-color: rgba(255, 255, 255, 0.2);
   backdrop-filter: blur(10px);            
   border-radius: 15px;
@@ -92,6 +92,7 @@ canvas {
 .btn-primary {
   color: #fff !important;
 }
+
 .btn-primary:hover,
 .btn-primary:focus {
   color: #fff !important;

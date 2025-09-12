@@ -8,12 +8,12 @@ load_dotenv()
 
 API_KEY = os.getenv("OPENAI_API_KEY")
 
-class KeyHandler(BaseHTTPRequestHandler):
+class Handler(BaseHTTPRequestHandler):
     def _set_headers(self, status=200, content_type="application/json"):
         self.send_response(status)
         self.send_header("Content-type", content_type)
         self.send_header("Access-Control-Allow-Origin", "*")
-        self.send_header("Access-Control-Allow-Methods", "GET, OPTIONS")
+        self.send_header("Access-Control-Allow-Methods", "GET, OPTIONS, POST")
         self.send_header("Access-Control-Allow-Headers", "Content-Type, ngrok-skip-browser-warning")
         self.end_headers()
 
@@ -23,13 +23,13 @@ class KeyHandler(BaseHTTPRequestHandler):
             response_data = {"key": API_KEY}
             self.wfile.write(json.dumps(response_data).encode("utf-8"))
         else:
-            self._set_headers(404)
+            self._set_headers(status=404)
 
     def do_OPTIONS(self):
         self._set_headers()
 
 def start_server():
-    server = HTTPServer(("0.0.0.0", 8080), KeyHandler)
+    server = HTTPServer(("0.0.0.0", 8080), Handler)
     print("Starting server on http://0.0.0.0:8080")
     server.serve_forever()
 

@@ -47,8 +47,13 @@
 
                 <div class="canvas-container glass d-flex flex-column flex-grow-2">
                     <div class="dashboard container-fluid">
-                        <input type="number" id="search-input" placeholder="Введите узел">
-                        <button id="search-btn" class="btn btn-primary">Найти</button>
+                        <div class="search-elements-container container-fluid d-flex">
+                            <input type="number" id="search-input" placeholder="Введите узел">
+                            <button id="search-btn" class="btn btn-primary">Найти</button>
+                        </div>
+                        <div class="download-btn-container container-fluid d-flex">
+                            <button class="btn btn-primary" id="save-btn">Сохранить</button>
+                        </div>
                     </div>
                     <div class="canvas-container d-flex flex-column flex-grow-2" id="canvas-parent">
                         <canvas id="canvas-tree"></canvas>

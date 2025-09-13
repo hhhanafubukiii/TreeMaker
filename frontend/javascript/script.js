@@ -8,6 +8,7 @@ const ctx = canvas.getContext("2d");
 const canvasParent = document.getElementById("canvas-parent");
 const searchInput = document.getElementById("search-input");
 const searchButton = document.getElementById("search-btn");
+const saveButton = document.getElementById("save-btn")
 
 // Variables
 let inputMode = "code";
@@ -38,8 +39,8 @@ async function getKey() {
     headers.append("ngrok-skip-browser-warning", "true");
 
     const response = await fetch("https://417fe845d85d.ngrok-free.app/api/key", {
-      method: "GET",
-      headers: headers,
+        method: "GET",
+        headers: headers,
     });
 
     console.log(response)
@@ -62,6 +63,7 @@ document.addEventListener("DOMContentLoaded", () => {
     AIButton.addEventListener("click", () => loadInputMode(AIButton, codeButton));
     visualizeButton.addEventListener("click", () => startProcess());
     searchButton.addEventListener("click", () => findNode())
+    saveButton.addEventListener("click", () => saveTree())
 
     window.addEventListener("resize", resizeCanvas);
     resizeCanvas();
@@ -85,7 +87,7 @@ document.addEventListener("DOMContentLoaded", () => {
         originY += dy;
         lastDragX = e.clientX;
         lastDragY = e.clientY;
-        draw();
+        draw(ctx, treeRoot);
     });
     canvas.addEventListener("wheel", (e) => {
         e.preventDefault();
@@ -102,7 +104,7 @@ document.addEventListener("DOMContentLoaded", () => {
         scale *= zoom;
         scale = Math.min(scale, 5)
         scale = Math.max(scale, 0.1)
-        draw();
+        draw(ctx, treeRoot);
     });
     canvas.addEventListener("touchstart", (e) => {
         if (e.touches.length === 1) {
@@ -121,7 +123,7 @@ document.addEventListener("DOMContentLoaded", () => {
             originY += dy;
             lastTouchX = e.touches[0].clientX;
             lastTouchY = e.touches[0].clientY;
-            draw();
+            draw(ctx, treeRoot);
         } else if (e.touches.length === 2) {
             const dx = e.touches[0].clientX - e.touches[1].clientX;
             const dy = e.touches[0].clientY - e.touches[1].clientY;
@@ -131,7 +133,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 const zoom = distance / lastDistance;
                 scale *= zoom;
                 scale = Math.max(0.1, Math.min(5, scale));
-                draw();
+                draw(ctx, treeRoot);
             } else {
                 lastDistance = distance;
             }
@@ -172,7 +174,7 @@ async function startProcess() {
 function renderTree(data) {
     treeRoot = buildTree(data);
     if (!treeRoot) {
-        draw();
+        draw(ctx, treeRoot);
         return;
     }
     calculateNodePositions(treeRoot);
@@ -181,7 +183,7 @@ function renderTree(data) {
     originX = canvas.width / 2 - rootPos.x * scale;
     originY = canvas.height / 4 - rootPos.y * scale;
 
-    draw();
+    draw(ctx);
 }
 
 function buildTree(arr) {
@@ -225,7 +227,36 @@ function calculateNodePositions(root) {
     nodePositions.forEach((pos) => (pos.x -= centerX));
 }
 
-function draw() {
+function saveTree() {
+    if (!treeRoot) return
+    console.log("something happens")
+    const allX = Array.from(nodePositions.values()).map((p) => p.x);
+    const allY = Array.from(nodePositions.values()).map((p) => p.y);
+
+    const minX = Math.min(...allX);
+    const maxX = Math.max(...allX);
+    const minY = Math.min(...allY);
+    const maxY = Math.max(...allY);
+
+    const width = maxX - minX + 200;
+    const height = maxY - minY + 200;
+
+    const exportCanvas = document.createElement("canvas");
+    exportCanvas.width = width;
+    exportCanvas.height = height;
+    const exportCtx = exportCanvas.getContext("2d");
+
+    exportCtx.translate(-minX + 100, -minY + 100);
+    drawRecursive(exportCtx, treeRoot);
+
+    const link = document.createElement("a");
+    link.download = "tree.png";
+    link.href = exportCanvas.toDataURL("image/png");
+    link.click();
+}
+
+
+function draw(ctx) {
     if (!treeRoot) return;
 
     ctx.save();
@@ -237,12 +268,12 @@ function draw() {
     ctx.translate(originX, originY);
     ctx.scale(scale, scale);
 
-    drawRecursive(treeRoot);
+    drawRecursive(ctx, treeRoot, scale);
 
     ctx.restore();
 }
 
-function drawRecursive(node) {
+function drawRecursive(ctx, node, scale=1) {
     if (!node) return;
     const pos = nodePositions.get(node);
 
@@ -254,7 +285,7 @@ function drawRecursive(node) {
         ctx.strokeStyle = "#aaa";
         ctx.lineWidth = 2 / scale;
         ctx.stroke();
-        drawRecursive(node.left);
+        drawRecursive(ctx, node.left);
     }
     if (node.right) {
         const childPos = nodePositions.get(node.right);
@@ -264,7 +295,7 @@ function drawRecursive(node) {
         ctx.strokeStyle = "#aaa";
         ctx.lineWidth = 2 / scale;
         ctx.stroke();
-        drawRecursive(node.right);
+        drawRecursive(ctx, node.right);
     }
 
     ctx.beginPath();
@@ -284,7 +315,7 @@ function resizeCanvas() {
     canvas.height = canvasParent.clientHeight;
     originX = canvas.width / 2;
     originY = canvas.height / 4;
-    draw();
+    draw(ctx);
 }
 
 function findNode() {
@@ -325,7 +356,7 @@ async function animateSearch(path) {
         originX = canvas.width / 2 - pos.x * scale;
         originY = canvas.height / 2 - pos.y * scale;
 
-        draw();
+        draw(ctx);
 
         ctx.save();
         ctx.translate(originX, originY);
@@ -401,5 +432,5 @@ async function getArrayFromDescription(description) {
 }
 
 function sleep(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
 }

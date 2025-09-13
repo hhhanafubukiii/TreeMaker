@@ -1,3 +1,4 @@
 /backend/.env
 /package.json
 /.vscode
+./.venv

@@ -82,9 +82,20 @@ section {
 .dashboard {
   display: flex;
   flex-direction: row;
+  justify-content: space-between;
   padding: 0.5em;
   background-color: #fafafa;
   border-radius: 10px;
+}
+
+.search-elements-container {
+  justify-content: left;
+  padding: 0 !important;
+}
+
+.download-btn-container {
+  justify-content: right;
+  padding: 0 !important;
 }
 
 #search-input {

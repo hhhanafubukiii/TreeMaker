@@ -38,10 +38,13 @@ async function getKey() {
     const headers = new Headers();
     headers.append("ngrok-skip-browser-warning", "true");
 
-    const response = await fetch("https://417fe845d85d.ngrok-free.app/api/key", {
+    const response = await fetch(
+      "https://1d6251445224.ngrok-free.app/api/key",
+      {
         method: "GET",
         headers: headers,
-    });
+      }
+    );
 
     console.log(response)
     const data = await response.json();
@@ -49,7 +52,6 @@ async function getKey() {
 }
 getKey()
 
-// Tree node class
 class TreeNode {
     constructor(value) {
         this.value = value;

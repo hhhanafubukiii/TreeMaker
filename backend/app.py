@@ -12,7 +12,7 @@ class Handler(BaseHTTPRequestHandler):
     def _set_headers(self, status=200, content_type="application/json"):
         self.send_response(status)
         self.send_header("Content-type", content_type)
-        self.send_header("Access-Control-Allow-Origin", "https://hhhanafubukiii.github.io/TreeMaker/")
+        self.send_header("Access-Control-Allow-Origin", "https://hhhanafubukiii.github.io")
         self.send_header("Access-Control-Allow-Methods", "GET, OPTIONS, POST")
         self.send_header("Access-Control-Allow-Headers", "Content-Type, ngrok-skip-browser-warning")
         self.end_headers()

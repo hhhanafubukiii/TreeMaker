@@ -39,7 +39,7 @@ async function getKey() {
     headers.append("ngrok-skip-browser-warning", "true");
 
     const response = await fetch(
-      "https://98c056661eac.ngrok-free.app/api/key",
+      "https://dda65f58f11d.ngrok-free.app/api/key",
       {
         method: "GET",
         headers: headers,

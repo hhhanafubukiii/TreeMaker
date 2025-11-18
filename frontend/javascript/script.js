@@ -10,7 +10,7 @@ const searchInput = document.getElementById("search-input");
 const searchButton = document.getElementById("search-btn");
 const saveButton = document.getElementById("save-btn")
 
-// Variables
+// Variables (Используем let, чтобы можно было менять значения)
 let inputMode = "code";
 let treeRoot = null;
 let nodePositions = new Map();
@@ -20,6 +20,7 @@ const zoomIntensity = 0.1;
 let scale = 1;
 let originX = 0;
 let originY = 0;
+
 // Mouse
 let isDragging = false;
 let lastDragX = 0;
@@ -31,26 +32,7 @@ let lastTouchX = 0;
 let lastTouchY = 0;
 let lastDistance = 0;
 
-// OpenAI API key
-API_KEY = null
-
-async function getKey() {
-    const headers = new Headers();
-    headers.append("ngrok-skip-browser-warning", "true");
-
-    const response = await fetch(
-      "https://d09cd0f6203d.ngrok-free.app/api/key",
-      {
-        method: "GET",
-        headers: headers,
-      }
-    );
-
-    console.log(response)
-    const data = await response.json();
-    API_KEY = data.key
-}
-getKey()
+const BACKEND_URL = "https://pityingly-commanding-nilgai.cloudpub.ru"; 
 
 class TreeNode {
     constructor(value) {
@@ -165,10 +147,12 @@ async function startProcess() {
     } else {
         try {
             const description = input.value;
+            // Ждем ответа от нашего сервера
             const numbers = await getArrayFromDescription(description);
             renderTree(numbers);
         } catch (err) {
-            alert(err);
+            console.error(err);
+            alert("Ошибка при получении данных от AI: " + err.message);
         }
     }
 }
@@ -275,7 +259,7 @@ function draw(ctx) {
     ctx.restore();
 }
 
-function drawRecursive(ctx, node, scale=1) {
+function drawRecursive(ctx, node, drawScale=1) {
     if (!node) return;
     const pos = nodePositions.get(node);
 
@@ -285,9 +269,9 @@ function drawRecursive(ctx, node, scale=1) {
         ctx.moveTo(pos.x, pos.y);
         ctx.lineTo(childPos.x, childPos.y);
         ctx.strokeStyle = "#aaa";
-        ctx.lineWidth = 2 / scale;
+        ctx.lineWidth = 2 / drawScale;
         ctx.stroke();
-        drawRecursive(ctx, node.left);
+        drawRecursive(ctx, node.left, drawScale);
     }
     if (node.right) {
         const childPos = nodePositions.get(node.right);
@@ -295,9 +279,9 @@ function drawRecursive(ctx, node, scale=1) {
         ctx.moveTo(pos.x, pos.y);
         ctx.lineTo(childPos.x, childPos.y);
         ctx.strokeStyle = "#aaa";
-        ctx.lineWidth = 2 / scale;
+        ctx.lineWidth = 2 / drawScale;
         ctx.stroke();
-        drawRecursive(ctx, node.right);
+        drawRecursive(ctx, node.right, drawScale);
     }
 
     ctx.beginPath();
@@ -390,15 +374,17 @@ function loadInputMode(activeBtn, inactiveBtn) {
             : "Введите описание дерева";
 }
 
+// Безопасная функция запроса
 async function getArrayFromDescription(description) {
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+    const headers = new Headers();
+    headers.append("Content-Type", "application/json");
+    headers.append("ngrok-skip-browser-warning", "true");
+
+    // Используем fetch безопасно, не перезаписывая переменные
+    const response = await fetch(`${BACKEND_URL}/api/chat`, {
         method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            Authorization: "Bearer " + API_KEY,
-        },
+        headers: headers,
         body: JSON.stringify({
-            model: "gpt-4o-mini",
             messages: [
                 {
                     role: "system",
@@ -407,7 +393,6 @@ async function getArrayFromDescription(description) {
                 },
                 { role: "user", content: description },
             ],
-            temperature: 0,
             response_format: {
                 type: "json_schema",
                 json_schema: {
@@ -427,10 +412,15 @@ async function getArrayFromDescription(description) {
         }),
     });
 
-    const data = await response.json();
-    const content = data.choices[0].message.content
-    const arr = JSON.parse(content).array
-    return arr
+    if (!response.ok) {
+        throw new Error(`Server Error: ${response.status}`);
+    }
+
+    // Внимание: объявляем новые переменные, не переиспользуем старые
+    const responseData = await response.json();
+    const content = responseData.choices[0].message.content;
+    const arr = JSON.parse(content).array;
+    return arr;
 }
 
 function sleep(ms) {

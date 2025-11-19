@@ -31,7 +31,7 @@ let lastTouchX = 0;
 let lastTouchY = 0;
 let lastDistance = 0;
 
-const BACKEND_URL = "https://brilliantly-ravishing-loon.cloudpub.ru"; 
+const BACKEND_URL = "https://flawlessly-confident-skunk.cloudpub.ru"; 
 
 class TreeNode {
     constructor(value) {

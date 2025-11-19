@@ -10,7 +10,6 @@ const searchInput = document.getElementById("search-input");
 const searchButton = document.getElementById("search-btn");
 const saveButton = document.getElementById("save-btn")
 
-// Variables (Используем let, чтобы можно было менять значения)
 let inputMode = "code";
 let treeRoot = null;
 let nodePositions = new Map();
@@ -32,7 +31,7 @@ let lastTouchX = 0;
 let lastTouchY = 0;
 let lastDistance = 0;
 
-const BACKEND_URL = "https://pityingly-commanding-nilgai.cloudpub.ru"; 
+const BACKEND_URL = "https://brilliantly-ravishing-loon.cloudpub.ru"; 
 
 class TreeNode {
     constructor(value) {

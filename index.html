@@ -52,7 +52,11 @@
                             <button id="search-btn" class="btn btn-primary">Найти</button>
                         </div>
                         <div class="download-btn-container container-fluid d-flex">
-                            <button class="btn btn-primary" id="save-btn">Сохранить</button>
+                            <div class="btn-group" role="group">
+                                <button class="btn btn-outline-primary" id="save-json-btn"
+                                    title="Скопировать JSON в буфер">JSON</button>
+                                <button class="btn btn-primary" id="save-png-btn" title="Скачать PNG">PNG</button>
+                            </div>
                         </div>
                     </div>
                     <div class="canvas-container d-flex flex-column flex-grow-2" id="canvas-parent">

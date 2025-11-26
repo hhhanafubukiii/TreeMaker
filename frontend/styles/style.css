@@ -93,9 +93,15 @@ section {
   padding: 0 !important;
 }
 
-.download-btn-container {
+.download-buttons-container {
   justify-content: right;
   padding: 0 !important;
+}
+
+.download-json-btn-container {
+  margin-right: 0 !important;
+  padding-right: 0 !important;
+  padding-left: 0 !important;
 }
 
 #search-input {
@@ -147,4 +153,20 @@ canvas {
   /* padding: 0 !important; */
   padding-top: 5px;
 }
+}
+
+.download-btn-container {
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.btn-group .btn {
+  margin-left: 0; 
+}
+
+@media(max-width: 500px) {
+   .download-btn-container {
+      justify-content: flex-start;
+      padding-top: 5px;
+   }
 }

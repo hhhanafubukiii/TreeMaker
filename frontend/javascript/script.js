@@ -8,7 +8,8 @@ const ctx = canvas.getContext("2d");
 const canvasParent = document.getElementById("canvas-parent");
 const searchInput = document.getElementById("search-input");
 const searchButton = document.getElementById("search-btn");
-const saveButton = document.getElementById("save-btn")
+const saveJSONButton = document.getElementById("save-json-btn");
+const savePNGButton = document.getElementById("save-png-btn");
 
 let inputMode = "code";
 let treeRoot = null;
@@ -31,7 +32,7 @@ let lastTouchX = 0;
 let lastTouchY = 0;
 let lastDistance = 0;
 
-const BACKEND_URL = "https://flawlessly-confident-skunk.cloudpub.ru"; 
+const BACKEND_URL = "http://localhost:8080"; 
 
 class TreeNode {
     constructor(value) {
@@ -41,12 +42,15 @@ class TreeNode {
     }
 }
 
+let tree_json = null;
+
 document.addEventListener("DOMContentLoaded", () => {
     codeButton.addEventListener("click", () => loadInputMode(codeButton, AIButton));
     AIButton.addEventListener("click", () => loadInputMode(AIButton, codeButton));
     visualizeButton.addEventListener("click", () => startProcess());
     searchButton.addEventListener("click", () => findNode())
-    saveButton.addEventListener("click", () => saveTree())
+    saveJSONButton.addEventListener("click", () => copyTreeJSON());
+    savePNGButton.addEventListener("click", () => saveTreeToPNG());
 
     window.addEventListener("resize", resizeCanvas);
     resizeCanvas();
@@ -139,6 +143,7 @@ async function startProcess() {
                 alert("Массив пустой или некорректный!");
                 return;
             }
+            tree_json = numbers; 
             renderTree(numbers);
         } catch (e) {
             alert("Введите валидный массив чисел, например [10, 5, 15]");
@@ -146,8 +151,8 @@ async function startProcess() {
     } else {
         try {
             const description = input.value;
-            // Ждем ответа от нашего сервера
             const numbers = await getArrayFromDescription(description);
+            tree_json = numbers;
             renderTree(numbers);
         } catch (err) {
             console.error(err);
@@ -212,9 +217,39 @@ function calculateNodePositions(root) {
     nodePositions.forEach((pos) => (pos.x -= centerX));
 }
 
-function saveTree() {
-    if (!treeRoot) return
-    console.log("something happens")
+function copyTreeJSON() {
+    if (!tree_json || tree_json.length === 0) {
+        alert("Дерево пустое, нечего копировать.");
+        return;
+    }
+    
+    const jsonString = JSON.stringify(tree_json);
+    
+    navigator.clipboard.writeText(jsonString)
+        .then(() => {
+            const originalText = saveJSONButton.innerText;
+            saveJSONButton.innerText = "Скопировано!";
+            saveJSONButton.classList.remove("btn-outline-primary");
+            saveJSONButton.classList.add("btn-success");
+            
+            setTimeout(() => {
+                saveJSONButton.innerText = originalText;
+                saveJSONButton.classList.remove("btn-success");
+                saveJSONButton.classList.add("btn-outline-primary");
+            }, 2000);
+        })
+        .catch(err => {
+            console.error('Ошибка копирования: ', err);
+            alert("Не удалось скопировать в буфер обмена.");
+        });
+}
+
+function saveTreeToPNG() {
+    if (!treeRoot) {
+        alert("Нет дерева для сохранения");
+        return;
+    }
+    
     const allX = Array.from(nodePositions.values()).map((p) => p.x);
     const allY = Array.from(nodePositions.values()).map((p) => p.y);
 
@@ -230,6 +265,9 @@ function saveTree() {
     exportCanvas.width = width;
     exportCanvas.height = height;
     const exportCtx = exportCanvas.getContext("2d");
+
+    exportCtx.fillStyle = "#FFFFFF";
+    exportCtx.fillRect(0, 0, width, height);
 
     exportCtx.translate(-minX + 100, -minY + 100);
     drawRecursive(exportCtx, treeRoot);
@@ -373,13 +411,11 @@ function loadInputMode(activeBtn, inactiveBtn) {
             : "Введите описание дерева";
 }
 
-// Безопасная функция запроса
 async function getArrayFromDescription(description) {
     const headers = new Headers();
     headers.append("Content-Type", "application/json");
     headers.append("ngrok-skip-browser-warning", "true");
 
-    // Используем fetch безопасно, не перезаписывая переменные
     const response = await fetch(`${BACKEND_URL}/api/chat`, {
         method: "POST",
         headers: headers,
@@ -415,7 +451,6 @@ async function getArrayFromDescription(description) {
         throw new Error(`Server Error: ${response.status}`);
     }
 
-    // Внимание: объявляем новые переменные, не переиспользуем старые
     const responseData = await response.json();
     const content = responseData.choices[0].message.content;
     const arr = JSON.parse(content).array;

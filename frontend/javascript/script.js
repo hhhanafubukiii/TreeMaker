@@ -32,7 +32,7 @@ let lastTouchX = 0;
 let lastTouchY = 0;
 let lastDistance = 0;
 
-const BACKEND_URL = "http://localhost:8080"; 
+const BACKEND_URL = "https://exultantly-artistic-dipper.cloudpub.ru"; 
 
 class TreeNode {
     constructor(value) {
@@ -414,7 +414,6 @@ function loadInputMode(activeBtn, inactiveBtn) {
 async function getArrayFromDescription(description) {
     const headers = new Headers();
     headers.append("Content-Type", "application/json");
-    headers.append("ngrok-skip-browser-warning", "true");
 
     const response = await fetch(`${BACKEND_URL}/api/chat`, {
         method: "POST",
